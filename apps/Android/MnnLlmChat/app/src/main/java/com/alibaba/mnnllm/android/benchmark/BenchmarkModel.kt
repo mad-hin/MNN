@@ -54,7 +54,13 @@ class BenchmarkModel {
         
         try {
             // Map backend string to MNN backend ID (0=CPU, 3=OpenCL)
-            val backendId = if (backendType.equals("opencl", ignoreCase = true)) 3 else 0
+            val backendId = when {
+                backendType.equals("opencl", ignoreCase = true) -> 3
+                backendType.equals("cuda", ignoreCase = true) -> 2
+                backendType.equals("auto", ignoreCase = true) -> 4
+                backendType.equals("vulkan", ignoreCase = true) -> 7
+                else -> 0 // cpu
+            }
             
             // Create runtime and test parameters following llm_bench.cpp defaults
             val runtimeParams = BenchmarkService.defaultRuntimeParams.copy(

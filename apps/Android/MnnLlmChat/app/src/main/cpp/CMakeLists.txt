@@ -22,6 +22,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         processor.cpp
         sana_jni.cpp
         sana_session.cpp
+        backend_test_jni.cpp
         # Video processing files (moved to video/ directory)
         video/video_decoder.cpp
         video/byte_buffer_decoder.cpp

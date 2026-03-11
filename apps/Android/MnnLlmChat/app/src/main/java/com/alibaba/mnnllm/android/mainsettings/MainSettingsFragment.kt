@@ -79,6 +79,7 @@ class MainSettingsFragment : Fragment() {
         setupDownloadProvider(sharedPreferences)
         setupDiffusionMemoryMode()
         setupVoiceModelManagement()
+        setupBackendSelection()
 
         binding.itemEnableApi.isChecked = MainSettings.isApiServiceEnabled(requireContext())
         binding.itemEnableApi.setOnCheckedChangeListener { isChecked ->
@@ -164,6 +165,13 @@ class MainSettingsFragment : Fragment() {
         binding.btnVoiceModelManagement.setOnClickListener {
             val sheet = com.alibaba.mnnllm.android.chat.voice.VoiceModelMarketBottomSheet.newInstance()
             sheet.show(childFragmentManager, "voice_model_market")
+        }
+    }
+
+    private fun setupBackendSelection() {
+        binding.btnBackendSelection.setOnClickListener {
+            val intent = Intent(requireContext(), BackendSelectionActivity::class.java)
+            startActivity(intent)
         }
     }
 

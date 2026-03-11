@@ -55,6 +55,7 @@ class LlmSession (
 
     override fun load() {
         Log.d(TAG, "MNN_DEBUG load begin modelId: $modelId backend: $backendType")
+        Log.e(TAG, "Backend in use for model $modelId: ${backendType ?: "from config"}")
         modelLoading = true
         isQnn = ModelTypeUtils.isQnnModel(modelId)
 

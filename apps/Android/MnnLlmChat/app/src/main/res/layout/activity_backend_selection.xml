@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="4dp" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?android:colorBackground">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
+
+            <!-- Backend Selection Section -->
+            <TextView
+                style="@style/SettingsSectionHeader"
+                android:text="@string/backend_selection_title" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/SettingsSectionGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Current Backend Display -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:minHeight="48dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            style="@style/SettingsRowLabel"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:text="@string/current_backend_label" />
+
+                        <TextView
+                            android:id="@+id/tv_current_backend"
+                            style="@style/SettingsRowValue"
+                            android:text="auto" />
+                    </LinearLayout>
+
+                    <com.google.android.material.divider.MaterialDivider
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp" />
+
+                    <!-- Default Backend Dropdown -->
+                    <com.alibaba.mnnllm.android.modelsettings.DropDownLineView
+                        android:id="@+id/dropdown_default_backend"
+                        style="@style/SettingsRowContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        app:icon="@drawable/baseline_arrow_drop_down_24"
+                        app:labelText="@string/backend_selection" />
+
+                    <!-- Auto-detected backend row (visible only when "auto" is selected) -->
+                    <com.google.android.material.divider.MaterialDivider
+                        android:id="@+id/divider_auto_detected"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/row_auto_detected"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:minHeight="48dp"
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            style="@style/SettingsRowLabel"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:text="@string/auto_will_use" />
+
+                        <TextView
+                            android:id="@+id/tv_auto_detected_backend"
+                            style="@style/SettingsRowValue"
+                            android:textStyle="bold"
+                            android:text="" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- CUDA Test Section -->
+            <TextView
+                style="@style/SettingsSectionHeader"
+                android:text="CUDA Backend Test" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/SettingsSectionGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_test_cuda"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/test_cuda_backend"
+                        style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                    <TextView
+                        android:id="@+id/tv_cuda_test_result"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

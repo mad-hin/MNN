@@ -136,8 +136,8 @@ class SettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
         }
 
         // Backend
-        val backendOptions = listOf("cpu", "opencl")
-        val currentBackend = currentConfig.backendType.takeIf { it in backendOptions } ?: "cpu"
+        val backendOptions = listOf("auto", "cpu", "opencl", "vulkan", "cuda")
+        val currentBackend = currentConfig.backendType.takeIf { it in backendOptions } ?: "auto"
         binding.dropdownBackend.setCurrentItem(currentBackend)
         binding.dropdownBackend.setDropDownItems(
             backendOptions,

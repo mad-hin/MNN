@@ -93,6 +93,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".mainsettings.BackendSelectionActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="false"
+            android:label="@string/backend_selection_title" />
+
 <!--        <activity-->
 <!--            android:name=".modelsettings.SettingsActivity"-->
 <!--            android:exported="true">-->

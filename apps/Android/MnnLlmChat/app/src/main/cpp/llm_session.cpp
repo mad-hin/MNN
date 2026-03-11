@@ -118,6 +118,11 @@ void LlmSession::Load() {
     }
     current_config_ = config;
     auto config_str = config.dump();
+    std::string backend_str = "auto";
+    if (config.contains("backend_type")) {
+        backend_str = config["backend_type"].get<std::string>();
+    }
+    MNN_ERROR("LLM Backend selected: %s", backend_str.c_str());
     MNN_DEBUG("extra_config: %s", config_str.c_str());
     ReportLlmSetConfigToFirebase("load", config_str);
     llm_->set_config(config_str);

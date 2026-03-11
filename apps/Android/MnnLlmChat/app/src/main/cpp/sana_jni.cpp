@@ -26,7 +26,7 @@ Java_com_alibaba_mnnllm_android_llm_SanaSession_initNative(JNIEnv *env,
         memory_mode = std::stoi(mode_str);
     }
     
-    int backend_type = MNN_FORWARD_OPENCL;
+    int backend_type = MNN_FORWARD_AUTO;
     if (config.contains("backend_type")) {
         std::string backend_str = config["backend_type"];
         if (backend_str == "cpu") {
@@ -35,8 +35,15 @@ Java_com_alibaba_mnnllm_android_llm_SanaSession_initNative(JNIEnv *env,
             backend_type = MNN_FORWARD_OPENCL;
         } else if (backend_str == "vulkan") {
             backend_type = MNN_FORWARD_VULKAN;
+        } else if (backend_str == "cuda") {
+            backend_type = MNN_FORWARD_CUDA;
+        } else if (backend_str == "auto") {
+            backend_type = MNN_FORWARD_AUTO;
         }
     }
+    MNN_ERROR("Backend selected: %s (MNNForwardType=%d)", 
+             config.contains("backend_type") ? config["backend_type"].get<std::string>().c_str() : "auto", 
+             backend_type);
     
     int width = 512;
     int height = 512;

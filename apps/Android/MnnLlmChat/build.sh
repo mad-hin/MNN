@@ -1,4 +1,27 @@
-cd ../../../project/android
+#!/bin/bash
+set -e
+
+# Set ANDROID_HOME if not already set
+if [ -z "$ANDROID_HOME" ]; then
+    if [ -d "$HOME/Android/Sdk" ]; then
+        export ANDROID_HOME="$HOME/Android/Sdk"
+    elif [ -n "$ANDROID_SDK_ROOT" ]; then
+        export ANDROID_HOME="$ANDROID_SDK_ROOT"
+    fi
+fi
+
+# Set ANDROID_NDK if not already set
+if [ -z "$ANDROID_NDK" ]; then
+    if [ -d "$ANDROID_HOME/ndk" ]; then
+        ANDROID_NDK=$(ls -d "$ANDROID_HOME/ndk/"*/ 2>/dev/null | sort -V | tail -1)
+        ANDROID_NDK=${ANDROID_NDK%/}
+        export ANDROID_NDK
+    fi
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+cd "$SCRIPT_DIR/../../../project/android"
 mkdir -p build_64
 cd build_64
 ../build_64.sh "\
@@ -21,5 +44,5 @@ cd build_64
 -DCMAKE_SHARED_LINKER_FLAGS='-Wl,-z,max-page-size=16384' \
 -DCMAKE_INSTALL_PREFIX=."
 make install
-cd ../../../apps/Android/MnnLlmChat/
+cd "$SCRIPT_DIR"
 ./gradlew assembleStandardDebug

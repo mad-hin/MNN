@@ -32,9 +32,11 @@ class SanaSession(
             Log.w(TAG, "Failed to load ModelConfig for $modelId, using defaults: ${e.message}")
             null
         }
+        val effectiveBackend = config?.backendType ?: "auto"
+        Log.e(TAG, "Backend in use for model $modelId: $effectiveBackend")
         val configMap = HashMap<String, Any>().apply {
             put("diffusion_memory_mode", config?.diffusionMemoryMode ?: "0")
-            put("backend_type", config?.backendType ?: "opencl")
+            put("backend_type", config?.backendType ?: "auto")
             put("image_width", config?.imageWidth ?: 512)
             put("image_height", config?.imageHeight ?: 512)
             put("grid_size", config?.gridSize ?: 1)

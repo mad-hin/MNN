@@ -57,23 +57,28 @@ class BackendSelectionActivity : AppCompatActivity() {
 
         dropdownBackend.setCurrentItem(currentBackend)
         dropdownBackend.setDropDownItems(
-            backendOptions,
-            itemToString = { it.toString() },
-            onDropdownItemSelected = { _, item ->
-                val selected = item.toString()
-                setDefaultBackend(selected)
-                tvCurrentBackend.text = selected
-                Log.e(TAG, "Backend changed to: $selected")
+                backendOptions,
+                itemToString = { it.toString() },
+                onDropdownItemSelected = { _, item ->
+                    val selected = item.toString()
+                    setDefaultBackend(selected)
+                    tvCurrentBackend.text = selected
+                    Log.e(TAG, "Backend changed to: $selected")
 
-                if (selected == "auto") {
-                    showAutoDetection(rowAutoDetected, dividerAutoDetected, tvAutoDetectedBackend)
-                } else {
-                    rowAutoDetected.visibility = View.GONE
-                    dividerAutoDetected.visibility = View.GONE
+                    if (selected == "auto") {
+                        showAutoDetection(
+                                rowAutoDetected,
+                                dividerAutoDetected,
+                                tvAutoDetectedBackend
+                        )
+                    } else {
+                        rowAutoDetected.visibility = View.GONE
+                        dividerAutoDetected.visibility = View.GONE
+                    }
+
+                    Toast.makeText(this, "Default backend set to: $selected", Toast.LENGTH_SHORT)
+                            .show()
                 }
-
-                Toast.makeText(this, "Default backend set to: $selected", Toast.LENGTH_SHORT).show()
-            }
         )
     }
 
@@ -85,29 +90,31 @@ class BackendSelectionActivity : AppCompatActivity() {
         tvResult.setTextColor(getColor(android.R.color.darker_gray))
 
         Thread {
-            try {
-                val detected = detectAutoBackendNative()
-                val display = backendDisplayName(detected)
-                runOnUiThread {
-                    tvResult.text = display
-                    Log.e(TAG, "Auto backend detection result: $detected ($display)")
+                    try {
+                        val detected = detectAutoBackendNative()
+                        val display = backendDisplayName(detected)
+                        runOnUiThread {
+                            tvResult.text = display
+                            Log.e(TAG, "Auto backend detection result: $detected ($display)")
+                        }
+                    } catch (e: Exception) {
+                        runOnUiThread {
+                            tvResult.text = "Detection failed: ${e.message}"
+                            Log.e(TAG, "Auto backend detection failed", e)
+                        }
+                    }
                 }
-            } catch (e: Exception) {
-                runOnUiThread {
-                    tvResult.text = "Detection failed: ${e.message}"
-                    Log.e(TAG, "Auto backend detection failed", e)
-                }
-            }
-        }.start()
+                .start()
     }
 
     /** Human-readable label for each backend key. */
-    private fun backendDisplayName(backend: String): String = when (backend) {
-        "opencl" -> "OpenCL  (GPU — mobile GPU acceleration)"
-        "vulkan" -> "Vulkan  (GPU — modern low-overhead API)"
-        "cpu"    -> "CPU  (no compatible GPU driver found)"
-        else     -> backend
-    }
+    private fun backendDisplayName(backend: String): String =
+            when (backend) {
+                "opencl" -> "OpenCL  (GPU — mobile GPU acceleration)"
+                "vulkan" -> "Vulkan  (GPU — modern low-overhead API)"
+                "cpu" -> "CPU  (no compatible GPU driver found)"
+                else -> backend
+            }
 
     private fun setupCudaTest() {
         val btnTestCuda: MaterialButton = findViewById(R.id.btn_test_cuda)
@@ -120,33 +127,32 @@ class BackendSelectionActivity : AppCompatActivity() {
             btnTestCuda.isEnabled = false
 
             Thread {
-                try {
-                    val raw = testCudaBackendNative()
-                    runOnUiThread {
-                        btnTestCuda.isEnabled = true
-                        displayCudaResult(tvResult, raw)
+                        try {
+                            val raw = testCudaBackendNative()
+                            runOnUiThread {
+                                btnTestCuda.isEnabled = true
+                                displayCudaResult(tvResult, raw)
+                            }
+                        } catch (e: Exception) {
+                            runOnUiThread {
+                                btnTestCuda.isEnabled = true
+                                tvResult.text = "✗ Unexpected error: ${e.message}"
+                                tvResult.setTextColor(getColor(android.R.color.holo_red_dark))
+                                Log.e(TAG, "CUDA test: unexpected exception", e)
+                            }
+                        }
                     }
-                } catch (e: Exception) {
-                    runOnUiThread {
-                        btnTestCuda.isEnabled = true
-                        tvResult.text = "✗ Unexpected error: ${e.message}"
-                        tvResult.setTextColor(getColor(android.R.color.holo_red_dark))
-                        Log.e(TAG, "CUDA test: unexpected exception", e)
-                    }
-                }
-            }.start()
+                    .start()
         }
     }
 
     /**
-     * Native result uses a prefix convention:
-     *   "OK:"   → success  (green)
-     *   "WARN:" → expected limitation, e.g. no NVIDIA GPU (orange)
-     *   "ERR:"  → unexpected failure (red)
+     * Native result uses a prefix convention: "OK:" → success (green) "WARN:" → expected
+     * limitation, e.g. no NVIDIA GPU (orange) "ERR:" → unexpected failure (red)
      */
     private fun displayCudaResult(tvResult: TextView, raw: String) {
         val colonIdx = raw.indexOf(':')
-        val prefix  = if (colonIdx > 0) raw.substring(0, colonIdx) else ""
+        val prefix = if (colonIdx > 0) raw.substring(0, colonIdx) else ""
         val message = if (colonIdx > 0) raw.substring(colonIdx + 1).trim() else raw
 
         when (prefix) {

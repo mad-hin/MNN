@@ -2,7 +2,7 @@
 
 ## Overview
 
-The MnnLlmChat Android app uses the MNN inference engine via JNI. Backend selection (CPU, OpenCL, Vulkan, etc.) is configured at the Java/Kotlin layer and passed down through JNI to native C++ code, which ultimately calls MNN APIs with the selected `MNNForwardType`.
+The MnnLlmChat Android app uses the MNN inference engine via JNI. Backend selection (CPU, OpenCL, Vulkan, etc.) is configured at the Java/Kotlin layer and passed down through JNI to native C++ code, which ultimately calls MNN APIs with the selected `MNNForwardType` .
 
 ## Backend Selection Flow
 
@@ -12,37 +12,44 @@ User UI  →  Kotlin Config  →  JSON Serialization  →  JNI  →  C++ MNN Eng
 
 ### 1. UI Layer — Backend Dropdown
 
-**LLM models** — [`SettingsBottomSheetFragment.kt`](app/src/main/java/com/alibaba/mnnllm/android/modelsettings/SettingsBottomSheetFragment.kt) (line ~140):
+**LLM models** — [ `SettingsBottomSheetFragment.kt` ](app/src/main/java/com/alibaba/mnnllm/android/modelsettings/SettingsBottomSheetFragment.kt) (line ~140):
+
 ```kotlin
 val backendOptions = listOf("cpu", "opencl")   // ← HARDCODED to only cpu/opencl
 val currentBackend = currentConfig.backendType.takeIf { it in backendOptions } ?: "cpu"
 ```
-- Default: `"cpu"`
-- Only two options: `"cpu"` and `"opencl"`
 
-**Diffusion/Sana models** — [`DiffusionSettingsBottomSheetFragment.kt`](app/src/main/java/com/alibaba/mnnllm/android/modelsettings/DiffusionSettingsBottomSheetFragment.kt) (line ~141):
+* Default: `"cpu"`
+* Only two options: `"cpu"` and `"opencl"`
+
+**Diffusion/Sana models** — [ `DiffusionSettingsBottomSheetFragment.kt` ](app/src/main/java/com/alibaba/mnnllm/android/modelsettings/DiffusionSettingsBottomSheetFragment.kt) (line ~141):
+
 ```kotlin
 val backendOptions = listOf("cpu", "opencl")   // ← HARDCODED to only cpu/opencl
 val currentBackend = currentConfig.backendType.takeIf { it in backendOptions } ?: "opencl"
 ```
-- Default: `"opencl"`
-- Only two options: `"cpu"` and `"opencl"`
+
+* Default: `"opencl"`
+* Only two options: `"cpu"` and `"opencl"`
 
 ### 2. Configuration Data Class
 
-[`ModelConfig.kt`](app/src/main/java/com/alibaba/mnnllm/android/modelsettings/ModelConfig.kt):
+[ `ModelConfig.kt` ](app/src/main/java/com/alibaba/mnnllm/android/modelsettings/ModelConfig.kt):
+
 ```kotlin
 data class ModelConfig(
     @SerializedName("backend_type") var backendType: String?,
     // ... other fields
 )
 ```
-- `backendType` is stored as a string (`"cpu"`, `"opencl"`, etc.)
-- The `defaultConfig` companion object sets `backendType = ""` (empty string)
+
+* `backendType` is stored as a string (`"cpu"`,  `"opencl"`, etc.)
+* The `defaultConfig` companion object sets `backendType = ""` (empty string)
 
 ### 3. Session Layer — Backend Override
 
-**LLM Session** — [`LlmSession.kt`](app/src/main/java/com/alibaba/mnnllm/android/llm/LlmSession.kt):
+**LLM Session** — [ `LlmSession.kt` ](app/src/main/java/com/alibaba/mnnllm/android/llm/LlmSession.kt):
+
 ```kotlin
 class LlmSession(
     ...
@@ -58,7 +65,8 @@ class LlmSession(
 }
 ```
 
-**Sana/Diffusion Session** — [`SanaSession.kt`](app/src/main/java/com/alibaba/mnnllm/android/llm/SanaSession.kt):
+**Sana/Diffusion Session** — [ `SanaSession.kt` ](app/src/main/java/com/alibaba/mnnllm/android/llm/SanaSession.kt):
+
 ```kotlin
 val configMap = HashMap<String, Any>().apply {
     put("backend_type", config?.backendType ?: "opencl")   // ← HARDCODED default to "opencl"
@@ -68,12 +76,13 @@ nativePtr = initNative(configPath, Gson().toJson(configMap))
 
 ### 4. JNI / Native Layer
 
-**LLM JNI** — [`llm_mnn_jni.cpp`](app/src/main/cpp/llm_mnn_jni.cpp):
-- Receives the merged config JSON string
-- Passes it to `LlmSession` constructor which calls `llm_->set_config(config_str)` internally
-- The MNN LLM engine reads `backend_type` from the config JSON
+**LLM JNI** — [ `llm_mnn_jni.cpp` ](app/src/main/cpp/llm_mnn_jni.cpp):
+* Receives the merged config JSON string
+* Passes it to `LlmSession` constructor which calls `llm_->set_config(config_str)` internally
+* The MNN LLM engine reads `backend_type` from the config JSON
 
-**Sana JNI** — [`sana_jni.cpp`](app/src/main/cpp/sana_jni.cpp) (line ~29):
+**Sana JNI** — [ `sana_jni.cpp` ](app/src/main/cpp/sana_jni.cpp) (line ~29):
+
 ```cpp
 int backend_type = MNN_FORWARD_OPENCL;   // ← HARDCODED default to OpenCL
 if (config.contains("backend_type")) {
@@ -89,7 +98,8 @@ if (config.contains("backend_type")) {
 }
 ```
 
-**Sana Session** — [`sana_session.cpp`](app/src/main/cpp/sana_session.cpp):
+**Sana Session** — [ `sana_session.cpp` ](app/src/main/cpp/sana_session.cpp):
+
 ```cpp
 diffusion_.reset(Diffusion::createDiffusion(
     resource_path_,
@@ -101,7 +111,8 @@ diffusion_.reset(Diffusion::createDiffusion(
 
 ### 5. Benchmark
 
-[`BenchmarkModel.kt`](app/src/main/java/com/alibaba/mnnllm/android/benchmark/BenchmarkModel.kt):
+[ `BenchmarkModel.kt` ](app/src/main/java/com/alibaba/mnnllm/android/benchmark/BenchmarkModel.kt):
+
 ```kotlin
 val backendId = if (backendType.equals("opencl", ignoreCase = true)) 3 else 0
 // Only maps opencl→3, everything else→0 (CPU)
@@ -109,17 +120,19 @@ val backendId = if (backendType.equals("opencl", ignoreCase = true)) 3 else 0
 
 ### 6. Build & Manifest
 
-**CMakeLists.txt** — [`app/src/main/cpp/CMakeLists.txt`](app/src/main/cpp/CMakeLists.txt):
-- Links only `libMNN.so` (single unified library)
-- Backend-specific `.so` files (`libMNN_CL.so`, `libMNN_Express.so`) are commented out
+**CMakeLists.txt** — [ `app/src/main/cpp/CMakeLists.txt` ](app/src/main/cpp/CMakeLists.txt):
+* Links only `libMNN.so` (single unified library)
+* Backend-specific `.so` files (`libMNN_CL.so`,  `libMNN_Express.so`) are commented out
 
-**AndroidManifest.xml** — [`app/src/main/AndroidManifest.xml`](app/src/main/AndroidManifest.xml):
+**AndroidManifest.xml** — [ `app/src/main/AndroidManifest.xml` ](app/src/main/AndroidManifest.xml):
+
 ```xml
 <uses-native-library android:name="libOpenCL.so" android:required="false" />
 <uses-library android:name="libcdsprpc.so" android:required="false"/>
 ```
 
-**strings.xml** — [`res/values/strings.xml`](app/src/main/res/values/strings.xml):
+**strings.xml** — [ `res/values/strings.xml` ](app/src/main/res/values/strings.xml):
+
 ```xml
 <string name="backend">use opencl</string>   <!-- Label implies OpenCL only -->
 ```
@@ -129,15 +142,15 @@ val backendId = if (backendType.equals("opencl", ignoreCase = true)) 3 else 0
 | File | What's Hardcoded |
 |------|-----------------|
 | `SettingsBottomSheetFragment.kt` | Backend options limited to `listOf("cpu", "opencl")` |
-| `DiffusionSettingsBottomSheetFragment.kt` | Backend options limited to `listOf("cpu", "opencl")`, default `"opencl"` |
+| `DiffusionSettingsBottomSheetFragment.kt` | Backend options limited to `listOf("cpu", "opencl")` , default `"opencl"` |
 | `SanaSession.kt` | Default backend `"opencl"` when config is null |
-| `sana_jni.cpp` | Default `MNN_FORWARD_OPENCL`, no handling for `"auto"` or `"cuda"` |
+| `sana_jni.cpp` | Default `MNN_FORWARD_OPENCL` , no handling for `"auto"` or `"cuda"` |
 | `BenchmarkModel.kt` | Only maps `"opencl"` → 3, everything else → 0 |
 | `strings.xml` | `backend` string says "use opencl" |
 
 ## MNN Forward Type Constants
 
-From `include/MNN/MNNForwardType.h`:
+From `include/MNN/MNNForwardType.h` :
 
 | Constant | Value | Description |
 |----------|-------|-------------|

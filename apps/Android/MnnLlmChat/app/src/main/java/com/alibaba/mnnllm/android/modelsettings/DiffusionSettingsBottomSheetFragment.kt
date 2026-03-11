@@ -14,17 +14,19 @@ import com.alibaba.mnnllm.android.mainsettings.DiffusionMemoryMode
 import com.alibaba.mnnllm.android.modelsettings.ModelConfig.Companion.defaultConfig
 
 /**
- * Settings bottom sheet fragment for Diffusion and Sana models.
- * Provides settings specific to image generation models.
+ * Settings bottom sheet fragment for Diffusion and Sana models. Provides settings specific to image
+ * generation models.
  */
 class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
 
     private var _binding: FragmentDiffusionSettingsSheetBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDiffusionSettingsSheetBinding.inflate(inflater, container, false)
         return binding.root
@@ -32,7 +34,7 @@ class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
 
     override fun loadSettings() {
         super.loadSettings()
-        
+
         // Diffusion steps
         currentConfig.diffusionSteps = currentConfig.diffusionSteps ?: defaultConfig.diffusionSteps
         binding.editDiffusionSteps.setText(currentConfig.diffusionSteps.toString())
@@ -47,7 +49,7 @@ class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
         // Seed
         currentConfig.diffusionSeed = currentConfig.diffusionSeed ?: defaultConfig.diffusionSeed
         binding.editDiffusionSeed.setText(currentConfig.diffusionSeed.toString())
-        
+
         // CFG Prompt
         currentConfig.cfgPrompt = currentConfig.cfgPrompt ?: defaultConfig.cfgPrompt
         binding.editCfgPrompt.setText(currentConfig.cfgPrompt)
@@ -67,7 +69,9 @@ class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
             if (!text.isNullOrEmpty()) {
                 try {
                     currentConfig.diffusionSteps = text.toString().toInt()
-                } catch (e: Exception) { /* ignore */ }
+                } catch (e: Exception) {
+                    /* ignore */
+                }
             }
         }
 
@@ -75,7 +79,9 @@ class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
             if (!text.isNullOrEmpty()) {
                 try {
                     currentConfig.imageWidth = text.toString().toInt()
-                } catch (e: Exception) { /* ignore */ }
+                } catch (e: Exception) {
+                    /* ignore */
+                }
             }
         }
 
@@ -83,7 +89,9 @@ class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
             if (!text.isNullOrEmpty()) {
                 try {
                     currentConfig.imageHeight = text.toString().toInt()
-                } catch (e: Exception) { /* ignore */ }
+                } catch (e: Exception) {
+                    /* ignore */
+                }
             }
         }
 
@@ -91,7 +99,9 @@ class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
             if (!text.isNullOrEmpty()) {
                 try {
                     currentConfig.diffusionSeed = text.toString().toLong()
-                } catch (e: Exception) { /* ignore */ }
+                } catch (e: Exception) {
+                    /* ignore */
+                }
             }
         }
 
@@ -105,36 +115,43 @@ class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
             if (!text.isNullOrEmpty()) {
                 try {
                     currentConfig.gridSize = text.toString().toInt()
-                } catch (e: Exception) { /* ignore */ }
+                } catch (e: Exception) {
+                    /* ignore */
+                }
             }
         }
     }
 
     private fun setupAdvancedSettings() {
         // Diffusion memory mode
-        val memoryModeValue = currentConfig.diffusionMemoryMode 
-            ?: defaultConfig.diffusionMemoryMode 
-            ?: DiffusionMemoryMode.MEMORY_MODE_SAVING.value
+        val memoryModeValue =
+                currentConfig.diffusionMemoryMode
+                        ?: defaultConfig.diffusionMemoryMode
+                                ?: DiffusionMemoryMode.MEMORY_MODE_SAVING.value
         val memoryModeEntries = DiffusionMemoryMode.values().toList()
 
         fun getMemoryModeString(mode: DiffusionMemoryMode): String {
-            return when(mode) {
-                DiffusionMemoryMode.MEMORY_MODE_SAVING -> getString(R.string.diffusion_mode_memory_saving)
-                DiffusionMemoryMode.MEMORY_MODE_ENOUGH -> getString(R.string.diffusion_mode_memory_enough)
-                DiffusionMemoryMode.MEMORY_MODE_BALANCE -> getString(R.string.diffusion_mode_memory_balance)
+            return when (mode) {
+                DiffusionMemoryMode.MEMORY_MODE_SAVING ->
+                        getString(R.string.diffusion_mode_memory_saving)
+                DiffusionMemoryMode.MEMORY_MODE_ENOUGH ->
+                        getString(R.string.diffusion_mode_memory_enough)
+                DiffusionMemoryMode.MEMORY_MODE_BALANCE ->
+                        getString(R.string.diffusion_mode_memory_balance)
             }
         }
 
-        val currentMemoryMode = memoryModeEntries.find { it.value == memoryModeValue } 
-            ?: DiffusionMemoryMode.MEMORY_MODE_SAVING
+        val currentMemoryMode =
+                memoryModeEntries.find { it.value == memoryModeValue }
+                        ?: DiffusionMemoryMode.MEMORY_MODE_SAVING
 
         binding.dropdownDiffusionMemoryMode.setCurrentItem(currentMemoryMode)
         binding.dropdownDiffusionMemoryMode.setDropDownItems(
-            memoryModeEntries,
-            itemToString = { getMemoryModeString(it as DiffusionMemoryMode) },
-            onDropdownItemSelected = { _, item ->
-                currentConfig.diffusionMemoryMode = (item as DiffusionMemoryMode).value
-            }
+                memoryModeEntries,
+                itemToString = { getMemoryModeString(it as DiffusionMemoryMode) },
+                onDropdownItemSelected = { _, item ->
+                    currentConfig.diffusionMemoryMode = (item as DiffusionMemoryMode).value
+                }
         )
 
         // Backend
@@ -142,25 +159,19 @@ class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
         val currentBackend = currentConfig.backendType.takeIf { it in backendOptions } ?: "auto"
         binding.dropdownBackend.setCurrentItem(currentBackend)
         binding.dropdownBackend.setDropDownItems(
-            backendOptions,
-            itemToString = { it.toString() },
-            onDropdownItemSelected = { _, item ->
-                currentConfig.backendType = item.toString()
-            }
+                backendOptions,
+                itemToString = { it.toString() },
+                onDropdownItemSelected = { _, item -> currentConfig.backendType = item.toString() }
         )
     }
 
     override fun setupActionButtons() {
-        binding.buttonCancel.setOnClickListener {
-            dismiss()
-        }
+        binding.buttonCancel.setOnClickListener { dismiss() }
         binding.buttonSave.setOnClickListener {
             saveSettings()
             dismiss()
         }
-        binding.buttonReset.setOnClickListener {
-            resetSettingsToDefaults()
-        }
+        binding.buttonReset.setOnClickListener { resetSettingsToDefaults() }
     }
 
     override fun saveSettings() {
@@ -170,7 +181,7 @@ class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
         if (currentConfig == loadedConfig) {
             return
         }
-        
+
         // Check what changed
         if (currentConfig.diffusionMemoryMode != loadedConfig.diffusionMemoryMode) {
             needSaveConfig = true
@@ -179,11 +190,12 @@ class DiffusionSettingsBottomSheetFragment : BaseSettingsBottomSheetFragment() {
             needSaveConfig = true
             needRecreate = true
         } else if (currentConfig.diffusionSteps != loadedConfig.diffusionSteps ||
-                   currentConfig.imageWidth != loadedConfig.imageWidth ||
-                   currentConfig.imageHeight != loadedConfig.imageHeight ||
-                   currentConfig.diffusionSeed != loadedConfig.diffusionSeed ||
-                   currentConfig.cfgPrompt != loadedConfig.cfgPrompt ||
-                   currentConfig.gridSize != loadedConfig.gridSize) {
+                        currentConfig.imageWidth != loadedConfig.imageWidth ||
+                        currentConfig.imageHeight != loadedConfig.imageHeight ||
+                        currentConfig.diffusionSeed != loadedConfig.diffusionSeed ||
+                        currentConfig.cfgPrompt != loadedConfig.cfgPrompt ||
+                        currentConfig.gridSize != loadedConfig.gridSize
+        ) {
             needSaveConfig = true
             needRecreate = false
         }

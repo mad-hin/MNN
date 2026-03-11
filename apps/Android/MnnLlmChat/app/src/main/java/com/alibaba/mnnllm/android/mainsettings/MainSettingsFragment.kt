@@ -37,7 +37,8 @@ class MainSettingsFragment : Fragment() {
     }
 
     private var _binding: FragmentMainSettingsBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = _binding!!
 
     private var updateChecker: UpdateChecker? = null
     private var debugClickCount = 0
@@ -50,9 +51,9 @@ class MainSettingsFragment : Fragment() {
     private var crashDiagnosticsDialogShowing = false
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMainSettingsBinding.inflate(inflater, container, false)
         return binding.root
@@ -71,7 +72,8 @@ class MainSettingsFragment : Fragment() {
     private fun setupSettings() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
 
-        binding.itemStopDownload.isChecked = sharedPreferences.getBoolean("stop_download_on_chat", true)
+        binding.itemStopDownload.isChecked =
+                sharedPreferences.getBoolean("stop_download_on_chat", true)
         binding.itemStopDownload.setOnCheckedChangeListener { isChecked ->
             sharedPreferences.edit().putBoolean("stop_download_on_chat", isChecked).apply()
         }
@@ -92,14 +94,9 @@ class MainSettingsFragment : Fragment() {
         setupDebugMode(sharedPreferences)
     }
 
-    private fun setupDownloadProvider(
-        sharedPreferences: android.content.SharedPreferences
-    ) {
-        val providers = listOf(
-            ModelSources.sourceHuffingFace,
-            ModelSources.sourceModelScope,
-            "Modelers"
-        )
+    private fun setupDownloadProvider(sharedPreferences: android.content.SharedPreferences) {
+        val providers =
+                listOf(ModelSources.sourceHuffingFace, ModelSources.sourceModelScope, "Modelers")
 
         fun providerLabel(provider: String): String {
             return when (provider) {
@@ -116,54 +113,61 @@ class MainSettingsFragment : Fragment() {
         val currentProvider = MainSettings.getDownloadProviderString(requireContext())
 
         binding.dropdownDownloadProvider.setDropDownItems(
-            providers,
-            itemToString = { providerLabel(it as String) },
-            onDropdownItemSelected = { _, selected ->
-                val provider = selected as String
-                MainSettings.setDownloadProvider(requireContext(), provider)
-                val sourceType = when (provider) {
-                    ModelSources.sourceHuffingFace -> ModelSources.ModelSourceType.HUGGING_FACE
-                    ModelSources.sourceModelScope -> ModelSources.ModelSourceType.MODEL_SCOPE
-                    else -> ModelSources.ModelSourceType.MODELERS
+                providers,
+                itemToString = { providerLabel(it as String) },
+                onDropdownItemSelected = { _, selected ->
+                    val provider = selected as String
+                    MainSettings.setDownloadProvider(requireContext(), provider)
+                    val sourceType =
+                            when (provider) {
+                                ModelSources.sourceHuffingFace ->
+                                        ModelSources.ModelSourceType.HUGGING_FACE
+                                ModelSources.sourceModelScope ->
+                                        ModelSources.ModelSourceType.MODEL_SCOPE
+                                else -> ModelSources.ModelSourceType.MODELERS
+                            }
+                    ModelSources.setSourceType(sourceType)
+                    ModelRepository.clear()
+                    Toast.makeText(context, R.string.settings_complete, Toast.LENGTH_LONG).show()
                 }
-                ModelSources.setSourceType(sourceType)
-                ModelRepository.clear()
-                Toast.makeText(context, R.string.settings_complete, Toast.LENGTH_LONG).show()
-            }
         )
         binding.dropdownDownloadProvider.setCurrentItem(currentProvider)
     }
 
     private fun setupDiffusionMemoryMode() {
-        val memoryModes = listOf(
-            DiffusionMemoryMode.MEMORY_MODE_SAVING.value,
-            DiffusionMemoryMode.MEMORY_MODE_ENOUGH.value,
-            DiffusionMemoryMode.MEMORY_MODE_BALANCE.value
-        )
+        val memoryModes =
+                listOf(
+                        DiffusionMemoryMode.MEMORY_MODE_SAVING.value,
+                        DiffusionMemoryMode.MEMORY_MODE_ENOUGH.value,
+                        DiffusionMemoryMode.MEMORY_MODE_BALANCE.value
+                )
 
         fun memoryModeLabel(value: String): String {
             return when (value) {
-                DiffusionMemoryMode.MEMORY_MODE_SAVING.value -> getString(R.string.diffusion_mode_memory_saving)
-                DiffusionMemoryMode.MEMORY_MODE_ENOUGH.value -> getString(R.string.diffusion_mode_memory_enough)
+                DiffusionMemoryMode.MEMORY_MODE_SAVING.value ->
+                        getString(R.string.diffusion_mode_memory_saving)
+                DiffusionMemoryMode.MEMORY_MODE_ENOUGH.value ->
+                        getString(R.string.diffusion_mode_memory_enough)
                 else -> getString(R.string.diffusion_mode_memory_balance)
             }
         }
 
         val currentMode = MainSettings.getDiffusionMemoryMode(requireContext())
         binding.dropdownDiffusionMemoryMode.setDropDownItems(
-            memoryModes,
-            itemToString = { memoryModeLabel(it as String) },
-            onDropdownItemSelected = { _, selected ->
-                val mode = selected as String
-                MainSettings.setDiffusionMemoryMode(requireContext(), mode)
-            }
+                memoryModes,
+                itemToString = { memoryModeLabel(it as String) },
+                onDropdownItemSelected = { _, selected ->
+                    val mode = selected as String
+                    MainSettings.setDiffusionMemoryMode(requireContext(), mode)
+                }
         )
         binding.dropdownDiffusionMemoryMode.setCurrentItem(currentMode)
     }
 
     private fun setupVoiceModelManagement() {
         binding.btnVoiceModelManagement.setOnClickListener {
-            val sheet = com.alibaba.mnnllm.android.chat.voice.VoiceModelMarketBottomSheet.newInstance()
+            val sheet =
+                    com.alibaba.mnnllm.android.chat.voice.VoiceModelMarketBottomSheet.newInstance()
             sheet.show(childFragmentManager, "voice_model_market")
         }
     }
@@ -178,28 +182,32 @@ class MainSettingsFragment : Fragment() {
     private fun setupResetApiConfig() {
         binding.btnResetApi.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.reset_api_config)
-                .setMessage(R.string.reset_api_config_confirm_message)
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    ApiServerConfig.resetToDefault(requireContext())
-                    if (MainSettings.isApiServiceEnabled(requireContext()) && ApiServiceManager.isApiServiceRunning()) {
-                        ApiServiceManager.stopApiService(requireContext())
-                        ApiServiceManager.startApiService(requireContext())
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.api_config_reset_service_restarted),
-                            Toast.LENGTH_LONG
-                        ).show()
-                    } else {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.api_config_reset_to_default),
-                            Toast.LENGTH_LONG
-                        ).show()
+                    .setTitle(R.string.reset_api_config)
+                    .setMessage(R.string.reset_api_config_confirm_message)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        ApiServerConfig.resetToDefault(requireContext())
+                        if (MainSettings.isApiServiceEnabled(requireContext()) &&
+                                        ApiServiceManager.isApiServiceRunning()
+                        ) {
+                            ApiServiceManager.stopApiService(requireContext())
+                            ApiServiceManager.startApiService(requireContext())
+                            Toast.makeText(
+                                            requireContext(),
+                                            getString(R.string.api_config_reset_service_restarted),
+                                            Toast.LENGTH_LONG
+                                    )
+                                    .show()
+                        } else {
+                            Toast.makeText(
+                                            requireContext(),
+                                            getString(R.string.api_config_reset_to_default),
+                                            Toast.LENGTH_LONG
+                                    )
+                                    .show()
+                        }
                     }
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
         }
     }
 
@@ -218,10 +226,11 @@ class MainSettingsFragment : Fragment() {
                 privacyManager.setUserConsent(consented = true)
                 (requireActivity().application as? MnnLlmApplication)?.applyCrashReportingConsent()
                 Toast.makeText(
-                    requireContext(),
-                    getString(R.string.privacy_policy_consent_enabled),
-                    Toast.LENGTH_LONG
-                ).show()
+                                requireContext(),
+                                getString(R.string.privacy_policy_consent_enabled),
+                                Toast.LENGTH_LONG
+                        )
+                        .show()
                 return@setOnCheckedChangeListener
             }
 
@@ -231,25 +240,25 @@ class MainSettingsFragment : Fragment() {
             crashDiagnosticsDialogShowing = true
 
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.crash_diagnostics_disable_title)
-                .setMessage(R.string.crash_diagnostics_disable_confirm_message)
-                .setPositiveButton(R.string.crash_diagnostics_disable_confirm_action) { _, _ ->
-                    privacyManager.setUserConsent(consented = false)
-                    (requireActivity().application as? MnnLlmApplication)?.applyCrashReportingConsent()
-                    setCrashDiagnosticsChecked(false)
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.privacy_policy_consent_disabled),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-                .setNegativeButton(android.R.string.cancel) { _, _ ->
-                    setCrashDiagnosticsChecked(true)
-                }
-                .setOnDismissListener {
-                    crashDiagnosticsDialogShowing = false
-                }
-                .show()
+                    .setTitle(R.string.crash_diagnostics_disable_title)
+                    .setMessage(R.string.crash_diagnostics_disable_confirm_message)
+                    .setPositiveButton(R.string.crash_diagnostics_disable_confirm_action) { _, _ ->
+                        privacyManager.setUserConsent(consented = false)
+                        (requireActivity().application as? MnnLlmApplication)
+                                ?.applyCrashReportingConsent()
+                        setCrashDiagnosticsChecked(false)
+                        Toast.makeText(
+                                        requireContext(),
+                                        getString(R.string.privacy_policy_consent_disabled),
+                                        Toast.LENGTH_LONG
+                                )
+                                .show()
+                    }
+                    .setNegativeButton(android.R.string.cancel) { _, _ ->
+                        setCrashDiagnosticsChecked(true)
+                    }
+                    .setOnDismissListener { crashDiagnosticsDialogShowing = false }
+                    .show()
         }
     }
 
@@ -260,10 +269,11 @@ class MainSettingsFragment : Fragment() {
     }
 
     private fun setupUpdateAndVersion() {
-        binding.btnCheckUpdate.text = getString(
-            R.string.current_version_check_update,
-            AppUtils.getAppVersionName(requireContext())
-        )
+        binding.btnCheckUpdate.text =
+                getString(
+                        R.string.current_version_check_update,
+                        AppUtils.getAppVersionName(requireContext())
+                )
         binding.btnCheckUpdate.setOnClickListener {
             handleDebugClick()
             updateCheckRunnable?.let { debugClickHandler.removeCallbacks(it) }
@@ -282,9 +292,7 @@ class MainSettingsFragment : Fragment() {
         }
     }
 
-    private fun setupDebugMode(
-        sharedPreferences: android.content.SharedPreferences
-    ) {
+    private fun setupDebugMode(sharedPreferences: android.content.SharedPreferences) {
         val isActivated = sharedPreferences.getBoolean("debug_mode_activated", false)
         updateDebugModeVisibility(isActivated)
 
@@ -301,9 +309,10 @@ class MainSettingsFragment : Fragment() {
         if (debugClickCount >= DEBUG_CLICK_COUNT) {
             updateCheckRunnable?.let { debugClickHandler.removeCallbacks(it) }
             updateDebugModeVisibility(true)
-            PreferenceManager.getDefaultSharedPreferences(requireContext()).edit()
-                .putBoolean("debug_mode_activated", true)
-                .apply()
+            PreferenceManager.getDefaultSharedPreferences(requireContext())
+                    .edit()
+                    .putBoolean("debug_mode_activated", true)
+                    .apply()
             debugClickCount = 0
             Log.d(TAG, "Debug mode preference activated")
         } else {
